@@ -1,1 +1,560 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Evryday Evrywhr Yoga</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #faf8f2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-family: Georgia, serif;
+      overflow-x: hidden;
+      touch-action: none;
+      user-select: none;
+    }
+    .header {
+      width: 100%; max-width: 420px;
+      padding: 14px 18px 0;
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .title { font-size: 1.55rem; font-weight: bold; line-height: 1.15; color: #1a1a1a; }
+    .subtitle { font-size: 0.75rem; color: #444; text-align: right; font-style: italic; margin-top: 6px; line-height: 1.5; }
+    canvas { display: block; touch-action: none; }
+    .bottom { width: 100%; max-width: 420px; padding: 8px 14px 4px; text-align: center; }
+    .let-monkey {
+      border: 2px solid #1a1a1a; border-radius: 24px;
+      padding: 8px 18px; font-size: 0.82rem; font-weight: bold;
+      letter-spacing: 0.1em; color: #1a1a1a;
+      display: inline-flex; align-items: center; gap: 8px; margin-bottom: 5px;
+    }
+    .spin-text { font-size: 0.68rem; color: #555; font-style: italic; margin-bottom: 8px; line-height: 1.5; }
+    .how-label { font-size: 0.58rem; letter-spacing: 0.18em; color: #888; text-transform: uppercase; margin-bottom: 6px; }
+    .steps { display: flex; gap: 6px; justify-content: center; margin-bottom: 10px; }
+    .step {
+      border: 1.5px solid #ccc; border-radius: 8px; padding: 6px 5px;
+      font-size: 0.6rem; color: #333; flex: 1; text-align: center; line-height: 1.5;
+    }
+    .step-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 15px; height: 15px; border: 1.5px solid #333;
+      border-radius: 50%; font-size: 0.58rem; font-weight: bold; margin-bottom: 3px;
+    }
+    #btn {
+      padding: 11px 26px; background: #1a1a1a; border: none;
+      color: #faf8f2; font-family: Georgia, serif; font-size: 0.85rem;
+      border-radius: 6px; cursor: pointer; letter-spacing: 0.08em; margin-bottom: 10px;
+    }
+    #btn:disabled { background: #999; }
+    #result-box {
+      border: 2px solid #1a1a1a; border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 8px; display: none; text-align: left;
+    }
+    .res-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .res-day-circle {
+      border: 2px solid #1a1a1a; border-radius: 50%;
+      width: 40px; height: 40px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: bold; line-height: 1.2; flex-shrink: 0;
+    }
+    .res-title { font-size: 1rem; font-weight: bold; color: #1a1a1a; }
+    .res-desc  { font-size: 0.7rem; color: #555; font-style: italic; margin-top: 2px; }
+    .res-meta  { font-size: 0.62rem; color: #888; margin-top: 5px; }
+    .book-btn {
+      display: block; margin-top: 8px; padding: 9px;
+      background: #1a1a1a; color: #faf8f2; text-align: center;
+      font-weight: bold; font-size: 0.82rem; border-radius: 6px;
+      letter-spacing: 0.12em; cursor: pointer;
+    }
+    .navbar {
+      display: flex; justify-content: space-around;
+      width: 100%; max-width: 420px;
+      border-top: 1px solid #ccc; padding: 8px 0 6px;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 0.52rem; color: #888; letter-spacing: 0.07em;
+      text-transform: uppercase; gap: 2px;
+    }
+    .nav-item span { font-size: 1rem; }
+
+    /* Speech bubble */
+    .bubble {
+      position: relative;
+      background: #fff;
+      border: 3px solid #000;
+      border-radius: 20px;
+      padding: 12px 18px;
+      font-family: 'Comic Sans MS', cursive;
+      font-size: 14px;
+      max-width: 100%;
+      box-shadow: 4px 4px 0 #000;
+      margin: 10px 0;
+      text-align: left;
+    }
+    .bubble::before {
+      content: "";
+      position: absolute;
+      top: -18px;
+      left: 40px;
+      border-width: 0 12px 18px;
+      border-style: solid;
+      border-color: transparent transparent #000;
+    }
+    .bubble::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 43px;
+      border-width: 0 9px 14px;
+      border-style: solid;
+      border-color: transparent transparent #fff;
+    }
+    .bubble input {
+      display: block;
+      width: 100%;
+      margin: 6px 0;
+      padding: 8px 10px;
+      border: 2px solid #000;
+      border-radius: 8px;
+      font-family: Georgia, serif;
+      font-size: 13px;
+    }
+    .bubble-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .bubble-btns button {
+      flex: 1;
+      padding: 8px;
+      border: 2px solid #000;
+      border-radius: 8px;
+      font-family: 'Comic Sans MS', cursive;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .bubble-btns button:first-child { background: #1a1a1a; color: #fff; }
+    .bubble-btns button:last-child  { background: #fff; color: #1a1a1a; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="title">Evryday<br>Evrywhr<br>Yoga</div>
+  <div class="subtitle">You plan.<br>Monkey decides.</div>
+</div>
+
+<canvas id="c" width="360" height="360"></canvas>
+
+<div class="bottom">
+  <div class="let-monkey">⊙ LET THE MONKEY DECIDE!</div>
+  <div class="spin-text">Tilt your phone to move the scorpion.<br>Sting the monkey's foot!</div>
+  <div class="how-label">— HOW IT WORKS —</div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><br>Tilt phone<br>left or right</div>
+    <div class="step"><div class="step-num">2</div><br>Scorpion chases<br>monkey's foot</div>
+    <div class="step"><div class="step-num">3</div><br>Sting!<br>Pick activity.</div>
+  </div>
+  <button id="btn">▶ Enable Motion</button>
+  <div id="result-box">
+    <div class="res-header">
+      <div class="res-day-circle">
+        <div id="res-icon">💡</div>
+        <div id="res-day">WED</div>
+      </div>
+      <div>
+        <div class="res-title" id="res-title">Creative Session</div>
+        <div class="res-desc"  id="res-desc">Ideas, flow, and unfiltered creativity.</div>
+        <div class="res-meta"  id="res-meta">⏱ 2–4 HRS · 1:1 OR GROUP</div>
+      </div>
+    </div>
+    <div class="book-btn" id="book-btn">PLAY AGAIN ↺</div>
+  </div>
+
+  <!-- Speech bubble + contact form -->
+  <div id="speechBubble"    style="display:none"></div>
+  <div id="contactForm"     style="display:none"></div>
+  <div id="confirmationMsg" style="display:none"></div>
+</div>
+
+<div class="navbar">
+  <div class="nav-item"><span>📅</span>CALENDAR</div>
+  <div class="nav-item"><span>🧘</span>SESSIONS</div>
+  <div class="nav-item"><span>🦂</span>STING BOARD</div>
+  <div class="nav-item"><span>🐒</span>PROFILE</div>
+</div>
+
+<script>
+  const canvas = document.getElementById('c');
+  const ctx    = canvas.getContext('2d');
+  const W = 360, H = 360, CX = 180, CY = 180;
+
+  const WHEEL_R  = 158;
+  const INNER_R  = 62;
+  const MONKEY_W = 120, MONKEY_H = 180;
+  const SCORP_W  = 64,  SCORP_H  = 64;
+
+  const ACTIVITIES = [
+    { day:'MON', label:'Focus\nTime',        icon:'💻', desc:'Deep work and concentration time.',       meta:'2–3 HRS · 1:1' },
+    { day:'TUE', label:'Podcast\nSession',   icon:'🎙️', desc:'Record, listen, or share your stories.', meta:'1–2 HRS · GROUP' },
+    { day:'WED', label:'Creative\nSession',  icon:'💡', desc:'Ideas, flow, and unfiltered creativity.',meta:'2–4 HRS · 1:1 OR GROUP' },
+    { day:'THU', label:'Workout\n& Reset',   icon:'🏋️', desc:'Move your body, reset your mind.',       meta:'1 HR · GROUP' },
+    { day:'FRI', label:'Social\nChaos',      icon:'🍸', desc:'Connect, laugh, and let loose.',          meta:'2–4 HRS · GROUP' },
+    { day:'SAT', label:'Eat, Drink\nRegret', icon:'🍕', desc:'Indulge. No regrets (maybe some).',      meta:'Open ended · SOLO' },
+    { day:'SUN', label:'Recover\n& Reflect', icon:'🌿', desc:'Rest, reflect, and recharge.',           meta:'All day · SOLO' },
+  ];
+  const SLICES = ACTIVITIES.length;
+  const SLICE_ANGLE = (Math.PI * 2) / SLICES;
+
+  // --- State ---
+  let scorpAngle  = 0;
+  let monkeyAngle = -Math.PI / 2;
+  let monkeySpeed = 0.010;
+  let accelX      = 0;
+  let state       = 'waiting';
+  let biteTimer   = 0;
+  let shakeT      = 0;
+  let pickedActivity = null;
+
+  // Vary monkey speed
+  function randSpeed() {
+    monkeySpeed = (Math.random() * 0.008 + 0.006) * (Math.random() < 0.5 ? 1 : -1);
+    setTimeout(randSpeed, 2500 + Math.random() * 2500);
+  }
+  randSpeed();
+
+  // Load images
+  const monkeyImg = new Image();
+  const scorpImg  = new Image();
+  let loaded = 0;
+  function onLoad() { if (++loaded >= 2) loop(); }
+  monkeyImg.onload = onLoad; monkeyImg.onerror = onLoad;
+  scorpImg.onload  = onLoad; scorpImg.onerror  = onLoad;
+  monkeyImg.src = 'monkey.jpeg';
+  scorpImg.src  = 'scorpian.jpeg';
+
+  // --- Draw wheel ---
+  function drawWheel() {
+    ctx.beginPath(); ctx.arc(CX, CY, WHEEL_R, 0, Math.PI*2);
+    ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.beginPath(); ctx.arc(CX, CY, WHEEL_R-6, 0, Math.PI*2);
+    ctx.lineWidth = 1; ctx.stroke();
+    ctx.beginPath(); ctx.arc(CX, CY, INNER_R, 0, Math.PI*2);
+    ctx.strokeStyle = '#aaa'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    for (let i = 0; i < SLICES; i++) {
+      const startA = monkeyAngle + i * SLICE_ANGLE;
+      const midA   = startA + SLICE_ANGLE / 2;
+      ctx.beginPath();
+      ctx.moveTo(CX + INNER_R*Math.cos(startA), CY + INNER_R*Math.sin(startA));
+      ctx.lineTo(CX + WHEEL_R*Math.cos(startA), CY + WHEEL_R*Math.sin(startA));
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      const lx = CX + (WHEEL_R-13)*Math.cos(midA);
+      const ly = CY + (WHEEL_R-13)*Math.sin(midA);
+      ctx.save(); ctx.translate(lx, ly); ctx.rotate(midA + Math.PI/2);
+      ctx.font = 'bold 8px Georgia'; ctx.fillStyle = '#1a1a1a';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(ACTIVITIES[i].day, 0, 0);
+      ctx.restore();
+
+      const ix = CX + (WHEEL_R*0.65)*Math.cos(midA);
+      const iy = CY + (WHEEL_R*0.65)*Math.sin(midA);
+      ctx.font = '13px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(ACTIVITIES[i].icon, ix, iy);
+
+      const tx = CX + (WHEEL_R*0.82)*Math.cos(midA);
+      const ty = CY + (WHEEL_R*0.82)*Math.sin(midA);
+      ctx.save(); ctx.translate(tx, ty); ctx.rotate(midA + Math.PI/2);
+      ctx.font = '6.5px Georgia'; ctx.fillStyle = '#333';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ACTIVITIES[i].label.split('\n').forEach((ln, li, arr) => {
+        ctx.fillText(ln, 0, (li - (arr.length-1)/2) * 8 + 10);
+      });
+      ctx.restore();
+    }
+  }
+
+  // Monkey orbits inner circle, actively fleeing scorpion
+  let monkeyPos = Math.PI / 2; // monkey's angle on inner circle
+
+  function updateMonkey() {
+    let diff = scorpAngle - monkeyPos;
+    diff = ((diff + Math.PI*3) % (Math.PI*2)) - Math.PI;
+    const fleeSpeed = 0.022;
+    // Run away from scorpion
+    monkeyPos += (diff > 0 ? -1 : 1) * fleeSpeed;
+    // Panic boost when scorpion is close (within 60 deg)
+    if (Math.abs(diff) < Math.PI / 3) {
+      monkeyPos += (diff > 0 ? -1 : 1) * 0.02;
+    }
+  }
+
+  // --- Draw monkey orbiting inner circle ---
+  function drawMonkey(shake) {
+    const ox = shake ? Math.sin(shakeT * 10) * 6 : 0;
+    const oy = shake ? Math.cos(shakeT * 8)  * 4 : 0;
+    // Monkey center on inner circle
+    const mx = CX + INNER_R * Math.cos(monkeyPos);
+    const my = CY + INNER_R * Math.sin(monkeyPos);
+    if (monkeyImg.complete && monkeyImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.translate(mx + ox, my + oy);
+      ctx.rotate(monkeyPos + Math.PI / 2); // face outward along circle
+      ctx.drawImage(monkeyImg, -MONKEY_W/2, -MONKEY_H/2, MONKEY_W, MONKEY_H);
+      ctx.restore();
+    } else {
+      ctx.beginPath(); ctx.arc(mx + ox, my + oy, 22, 0, Math.PI*2);
+      ctx.fillStyle = '#ffaa00'; ctx.fill();
+    }
+  }
+
+  // --- Draw scorpion orbiting inner circle ---
+  function drawScorpion() {
+    const sx = CX + INNER_R * Math.cos(scorpAngle);
+    const sy = CY + INNER_R * Math.sin(scorpAngle);
+    if (scorpImg.complete && scorpImg.naturalWidth > 0) {
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(scorpAngle + Math.PI/2);
+      ctx.drawImage(scorpImg, -SCORP_W/2, -SCORP_H/2, SCORP_W, SCORP_H);
+      ctx.restore();
+    } else {
+      ctx.beginPath(); ctx.arc(sx, sy, 18, 0, Math.PI*2);
+      ctx.fillStyle = '#6622cc'; ctx.fill();
+    }
+  }
+
+  // --- Fallen monkey at sting position ---
+  function drawFallen() {
+    const mx = CX + INNER_R * Math.cos(monkeyPos);
+    const my = CY + INNER_R * Math.sin(monkeyPos);
+    ctx.save();
+    ctx.translate(mx, my);
+    ctx.rotate(monkeyPos + Math.PI); // flipped/fallen
+    if (monkeyImg.complete && monkeyImg.naturalWidth > 0) {
+      ctx.drawImage(monkeyImg, -MONKEY_W/2, -MONKEY_H/2, MONKEY_W, MONKEY_H);
+    }
+    ctx.restore();
+    ctx.font = '20px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('✦', mx+28, my-28);
+    ctx.fillText('✦', mx-28, my-28);
+    ctx.fillText('✦', mx, my-38);
+  }
+
+  // --- Collision: scorpion catches monkey ---
+  function checkBite() {
+    const mx = CX + INNER_R * Math.cos(monkeyPos);
+    const my = CY + INNER_R * Math.sin(monkeyPos);
+    const sx = CX + INNER_R * Math.cos(scorpAngle);
+    const sy = CY + INNER_R * Math.sin(scorpAngle);
+    return Math.sqrt((sx - mx)**2 + (sy - my)**2) < 30;
+  }
+
+  // --- Which activity is under monkey when stung ---
+  function pickActivity() {
+    let rel = ((monkeyPos - monkeyAngle) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+    return ACTIVITIES[Math.floor(rel / SLICE_ANGLE) % SLICES];
+  }
+
+  // --- Main loop ---
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#faf8f2'; ctx.fillRect(0, 0, W, H);
+
+    if (state === 'waiting') {
+      drawWheel();
+      drawMonkey(false);
+      drawScorpion();
+      ctx.font = 'italic 11px Georgia';
+      ctx.fillStyle = '#999'; ctx.textAlign = 'center';
+      ctx.fillText('Tap Enable Motion to start', CX, H - 6);
+
+    } else if (state === 'playing') {
+      // Wheel spins
+      monkeyAngle += monkeySpeed;
+
+      // Scorpion moves from tilt
+      scorpAngle += (accelX / 9.8) * 0.08;
+
+      // Monkey actively flees scorpion
+      updateMonkey();
+
+      drawWheel();
+      drawMonkey(false);
+      drawScorpion();
+
+      // Sting check
+      if (checkBite()) {
+        state = 'biting';
+        biteTimer = 0;
+        shakeT = 0;
+        pickedActivity = pickActivity();
+      }
+
+    } else if (state === 'biting') {
+      biteTimer++;
+      shakeT += 0.4;
+      monkeyAngle += monkeySpeed * 5;
+      drawWheel();
+      drawMonkey(true);
+      drawScorpion();
+      ctx.font = 'bold 26px Georgia';
+      ctx.fillStyle = '#cc2200'; ctx.textAlign = 'center';
+      ctx.fillText('STING! 🦂', CX, 30);
+      if (biteTimer > 90) { state = 'result'; showResult(); }
+
+    } else if (state === 'result') {
+      drawWheel();
+      drawFallen();
+      drawScorpion();
+    }
+
+    requestAnimationFrame(loop);
+  }
+
+  function showResult() {
+    if (!pickedActivity) return;
+    document.getElementById('res-icon').textContent  = pickedActivity.icon;
+    document.getElementById('res-day').textContent   = pickedActivity.day;
+    document.getElementById('res-title').textContent = pickedActivity.label.replace('\n', ' ');
+    document.getElementById('res-desc').textContent  = pickedActivity.desc;
+    document.getElementById('res-meta').textContent  = '⏱ ' + pickedActivity.meta;
+    const box = document.getElementById('result-box');
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth' });
+    // Show booking bubble after short delay
+    setTimeout(() => showSpeechBubble(pickedActivity), 1000);
+  }
+
+  document.getElementById('book-btn').addEventListener('click', () => {
+    state = 'playing';
+    scorpAngle = 0;
+    monkeyPos = Math.PI / 2;
+    pickedActivity = null;
+    document.getElementById('speechBubble').style.display='none';
+    document.getElementById('contactForm').style.display='none';
+    document.getElementById('confirmationMsg').style.display='none';
+    document.getElementById('result-box').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Accelerometer — exact same as working version
+  window.addEventListener('devicemotion', (e) => {
+    const acc = e.accelerationIncludingGravity;
+    if (!acc || acc.x === null) return;
+    accelX = accelX * 0.75 + acc.x * 0.25;
+  });
+
+  // ---- Speech bubble & booking ----
+  function showSpeechBubble(activity) {
+    const bubble = document.getElementById('speechBubble');
+    bubble.className = 'bubble';
+    bubble.style.display = 'block';
+    bubble.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <span style="font-size:2rem;line-height:1">🐒</span>
+        <div>
+          <strong style="font-size:15px">Ooh ooh! The monkey has decided!</strong><br><br>
+          Shall we confirm your<br>
+          <strong>${activity.icon} ${activity.label.replace('\n',' ')}</strong> session?<br>
+          <span style="font-size:11px;color:#555">${activity.desc}</span>
+        </div>
+      </div>
+      <div class="bubble-btns">
+        <button onclick="showContactForm()">Yes, let's go! 🎉</button>
+        <button onclick="dismissBubble()">Maybe later</button>
+      </div>`;
+    bubble.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function dismissBubble() {
+    document.getElementById('speechBubble').style.display = 'none';
+  }
+
+  function showContactForm() {
+    document.getElementById('speechBubble').style.display = 'none';
+    const form = document.getElementById('contactForm');
+    form.className = 'bubble';
+    form.style.display = 'block';
+    const act = pickedActivity;
+    form.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+        <span style="font-size:2rem;line-height:1">🐒</span>
+        <div>
+          <strong>Almost there!</strong><br>
+          <span style="font-size:12px;color:#555">
+            Enter your details and we'll send you the session link
+            + a reminder a couple of hours before. 🧘
+          </span>
+        </div>
+      </div>
+      <label style="font-size:12px;font-weight:bold">📧 Email</label>
+      <input type="email" id="emailInput" placeholder="your@email.com">
+      <label style="font-size:12px;font-weight:bold;margin-top:4px">📱 WhatsApp</label>
+      <input type="text" id="whatsappInput" placeholder="+1 234 567 8900">
+      <p style="font-size:10px;color:#888;margin:6px 0 2px">
+        Enter either or both — we'll send the link + a reminder before your session.
+      </p>
+      <div class="bubble-btns">
+        <button onclick="submitContact()">Confirm booking ✅</button>
+        <button onclick="document.getElementById('contactForm').style.display='none'">Cancel</button>
+      </div>`;
+    form.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function submitContact() {
+    const email    = document.getElementById('emailInput').value.trim();
+    const whatsapp = document.getElementById('whatsappInput').value.trim();
+    if (!email && !whatsapp) {
+      alert('Please enter at least your email or WhatsApp number.');
+      return;
+    }
+    document.getElementById('contactForm').style.display = 'none';
+
+    // Show confirmation bubble
+    const done = document.getElementById('confirmationMsg');
+    done.className = 'bubble';
+    done.style.display = 'block';
+    const act = pickedActivity;
+    done.innerHTML = `
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <span style="font-size:2rem;line-height:1">🐒</span>
+        <div>
+          <strong>✅ Session confirmed!</strong><br>
+          <strong>${act ? act.icon + ' ' + act.label.replace('\n',' ') : ''}</strong><br><br>
+          <span style="font-size:12px;color:#333">
+            We'll send your session link and a reminder to:<br>
+            ${email ? '📧 ' + email + '<br>' : ''}
+            ${whatsapp ? '📱 ' + whatsapp : ''}
+          </span><br>
+          <span style="font-size:11px;color:#888">See you soon! 🧘‍♀️</span>
+        </div>
+      </div>`;
+    done.scrollIntoView({ behavior: 'smooth' });
+
+    // TODO: POST to backend /book API
+    // fetch('/book', { method:'POST', body: JSON.stringify({ email, whatsapp, activity: act }) })
+  }
+
+  document.getElementById('btn').addEventListener('click', async () => {
+    if (typeof DeviceMotionEvent !== 'undefined' &&
+        typeof DeviceMotionEvent.requestPermission === 'function') {
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res !== 'granted') { alert('Permission denied'); return; }
+    }
+    document.getElementById('btn').textContent = '🦂 Tilt to move scorpion!';
+    document.getElementById('btn').disabled = true;
+    state = 'playing';
+  });
+</script>
+</body>
+</html>
